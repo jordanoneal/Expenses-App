@@ -5,6 +5,8 @@ import IconButton from '../components/ui/IconButton';
 import { GlobalStyles } from '../constants/styles';
 import CustomButton from '../components/ui/CustomButton';
 import { ExpensesContext } from '../store/expenses-context';
+import { TextInput } from 'react-native-gesture-handler';
+import ExpenseForm from '../components/ManageExpense/ExpenseForm';
 
 export default function ManageExpense() {
   const route = useRoute();
@@ -13,6 +15,8 @@ export default function ManageExpense() {
   const expensesContext = useContext(ExpensesContext);
 
   const edit = !!expenseId;
+
+  const selectedExpense = expensesContext.expenses.find((expense) => expense.id === expenseId)
 
   const navigation = useNavigation();
 
@@ -25,12 +29,12 @@ export default function ManageExpense() {
     navigation.goBack();
   }
 
-  const confirmHandler = () => {
+  const confirmHandler = (expenseData) => {
     if (edit) {
-      expensesContext.updateExpense(expenseId, { description: 'Test!!!!', amount: 39.99, date: new Date('2022-10-10') })
+      expensesContext.updateExpense(expenseId, expenseData)
     }
     else {
-      expensesContext.addExpense({ description: 'Test', amount: 19.99, date: new Date('2022-10-14') })
+      expensesContext.addExpense(expenseData)
     }
     navigation.goBack();
   }
@@ -43,10 +47,7 @@ export default function ManageExpense() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.buttonContainer}>
-        <CustomButton style={styles.button} mode='flat' onPress={cancelHandler}>Cancel</CustomButton>
-        <CustomButton style={styles.button} onPress={confirmHandler}>{edit ? 'Update' : 'Add'}</CustomButton>
-      </View>
+      <ExpenseForm submitButtonLabel={edit ? 'Update' : 'Add'} onCancel={cancelHandler} onSubmit={confirmHandler} defaultValues={selectedExpense} />
       {edit && (
         <View style={styles.deleteContainer}>
           <IconButton icon={'trash'} size={36} color={GlobalStyles.colors.error500} onPress={deleteExpenseHandler} />
@@ -69,13 +70,4 @@ const styles = StyleSheet.create({
     padding: 24,
     backgroundColor: GlobalStyles.colors.primary800
   },
-  buttonContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center'
-  },
-  button: {
-    minWidth: 120,
-    marginHorizontal: 8
-  }
 })
